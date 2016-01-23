@@ -1620,11 +1620,8 @@ const int FrontViewPositionNone = 0xff;
     if ( !controller || !view )
         return ^(void){};
     
-    CGRect frame = view.bounds;
-    
     UIView *controllerView = controller.view;
-    controllerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    controllerView.frame = frame;
+    controllerView.translatesAutoresizingMaskIntoConstraints = false;
     
     if ( [controllerView isKindOfClass:[UIScrollView class]] )
     {
@@ -1637,6 +1634,18 @@ const int FrontViewPositionNone = 0xff;
     }
     
     [view addSubview:controllerView];
+    
+    NSNumber *width = @(view.bounds.size.width);
+    if ([controller isEqual:self.rearViewController]) {
+        width = @(self.rearViewRevealWidth);
+    }
+    else if ([controller isEqual:self.rightViewController]) {
+        width = @(self.rightViewRevealWidth);
+    }
+    NSDictionary *views = @{ @"controllerView": controllerView };
+    NSDictionary *metrics = @{ @"width": width };
+    [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[controllerView(==width)]->=0-|" options:0 metrics:metrics views:views]];
+    [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[controllerView]|" options:0 metrics:metrics views:views]];
     
     void (^completionBlock)(void) = ^(void)
     {
